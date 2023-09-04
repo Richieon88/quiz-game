@@ -1,26 +1,112 @@
 //Question Bank
-let question = {
-    question: 'Capital of Ireland',
-    choices: ['London', 'Dublin', 'Madrid', 'Paris'],
-    correctAnwser: 1
-};
+const questions = [
+    {
+        question: "Capital of Ireland?",
+        answers: [
+            { text: "Paris", correct: false },
+            { text: "Dublin", correct: true },
+            { text: "Madrid", correct: false },
+            { text: "London", correct: false },
+        ]
+    },
+    {
+        question: "Capital of France?",
+        answers: [
+            { text: "Paris", correct: true },
+            { text: "Dublin", correct: false },
+            { text: "Madrid", correct: false },
+            { text: "London", correct: false },
+        ]
+    },
+    {
+        question: "Capital of Spain?",
+        answers: [
+            { text: "Paris", correct: false },
+            { text: "Dublin", correct: false },
+            { text: "Madrid", correct: true },
+            { text: "London", correct: false },
+        ]
+    }
+];
 
-//function for showing the question
-function showQuestion(q) {
-    let questionDiv = document.getElementById('question');
-    questionDiv.textContent = q.question;
+const questionElement = document.getElementById("question");
+const answerButton = document.getElementById("answer-btn");
+const nextButton = document.getElementById("next-btn");
 
-    let choices = document.querySelectorAll('.choices');
-    choices.forEach(function (element, index) {
-        element.textContent = q.choices[index];
-        element.addEventListener('click', function () {
-            if (q.correctAnwser === index) {
-                alert('Correct');
-            } else {
-                alert('Wrong');
-            }
-        });
+let currentQuestionIndex = 0;
+let score = 0;
+
+function startQuiz() {
+    currentQuestionIndex = 0;
+    score = 0;
+    nextButton.innerHTML = "Next";
+    showQuestion();
+}
+
+function showQuestion() {
+    resetState();
+    let currentQuestion = questions[currentQuestionIndex];
+    let questionNo = currentQuestionIndex + 1;
+    questionElement.innerHTML = questionNo + ". " + currentQuestion.question;
+
+    currentQuestion.answers.forEach(answer => {
+        const button = document.createElement("button");
+        button.innerHTML = answer.text;
+        button.classList.add("choices");
+        answerButton.appendChild(button);
+        if (answer.correct) {
+            button.dataset.correct = answer.correct;
+        }
+        button.addEventListener("click", selectAnswer);
     });
 }
 
-showQuestion(question);
+function resetState() {
+    nextButton.style.display = "none";
+    while (answerButton.firstChild) {
+        answerButton.removeChild(answerButton.firstChild);
+    }
+}
+
+function selectAnswer(e) {
+    const selectedBtn = e.target;
+    const isCorrect = selectedBtn.dataset.correct === "true";
+    if (isCorrect) {
+        selectedBtn.classList.add("correct");
+        score++;
+    } else {
+        selectedBtn.classList.add("incorrect");
+    }
+    Array.from(answerButton.children).forEach(button => {
+        if (button.dataset.correct === "true") {
+            button.classList.add("correct");
+        }
+        button.disabled = true;
+    });
+    nextButton.style.display = "block";
+}
+
+function showScore() {
+    resetState();
+    questionElement.innerHTML = `You scored ${score} out of ${questions.length}`;
+}
+
+function handleNextButton() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        showQuestion;
+    } else {
+        showScore();
+    }
+}
+
+nextButton.addEventListener("click", () => {
+    if (currentQuestionIndex < questions.length) {
+        handleNextButton();
+    } else {
+        startQuiz();
+    }
+});
+
+startQuiz();
+
